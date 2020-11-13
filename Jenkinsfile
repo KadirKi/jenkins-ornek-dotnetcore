@@ -1,12 +1,3 @@
-pipeline {
-    agent any
-
-    environment {
-        BUILD_NUM_ENV = currentBuild.getNumber()
-    }
-
-    stages {
-        stage('Temizlik') { 
             steps {
                 sh 'dotnet clean' 
             }
@@ -33,6 +24,14 @@ pipeline {
                     sh '$HOME/.dotnet/tools/dotnet-sonarscanner begin /k:DotNetOrnek /n:"Örnek DotNet Core Uygulaması" /v:"$BUILD_NUM_ENV"'
                     sh 'dotnet build --no-restore'
                     sh '$HOME/.dotnet/tools/dotnet-sonarscanner end'
+                }
+            }
+        }
+
+        stage("Kalite Kapısı") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
